@@ -90,15 +90,11 @@
 
     <script>
         // ---------------------------------------------------------
-        // ⚠️ 你需要修改的參數設定區 ⚠️
-        // ---------------------------------------------------------
-        
-        // 1. 設定你們的專屬通關密碼 (建議用只有你們知道的數字或拼音)
+        // 1. 設定你們的專屬通關密碼 
         const CORRECT_PASSWORD = "1012"; 
         
-        // 2. 設定 Step 3 的連結 (之後你做好的 Google Form 或 Canva 連結貼在這裡)
-        const NEXT_STEP_URL = "https://canva.link/mr3xtbv0fy1x2xa"; 
-
+        // 2. 這裡必須跳轉到選擇題關卡，而不是直接去 Canva
+        const NEXT_STEP_URL = "challenge.html"; 
         // ---------------------------------------------------------
 
         const outputDiv = document.getElementById('terminal-output');
@@ -119,26 +115,51 @@
 
         let lineIndex = 0;
 
-        // 打字機特效函數
         function typeLine() {
             if (lineIndex < bootSequence.length) {
                 const p = document.createElement('div');
                 p.textContent = bootSequence[lineIndex];
                 outputDiv.appendChild(p);
                 lineIndex++;
-                setTimeout(typeLine, 400); // 每行出現的延遲時間
+                setTimeout(typeLine, 400); 
             } else {
                 inputContainer.style.display = 'flex';
                 passwordInput.focus();
             }
         }
 
-        // 啟動動畫
         window.onload = () => {
             setTimeout(typeLine, 1000);
         };
 
-        // 監聽密碼輸入 (按下 Enter 鍵)
         passwordInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
-                const attempt = passwordInput.value
+                const attempt = passwordInput.value;
+                passwordInput.value = '';
+                
+                const attemptLog = document.createElement('div');
+                attemptLog.textContent = `root@heart-sys:~# ********`;
+                outputDiv.appendChild(attemptLog);
+
+                const responseLog = document.createElement('div');
+
+                if (attempt === CORRECT_PASSWORD) {
+                    responseLog.textContent = "ACCESS GRANTED. Redirecting to secure channel...";
+                    responseLog.className = 'success';
+                    outputDiv.appendChild(responseLog);
+                    
+                    setTimeout(() => {
+                        window.location.href = NEXT_STEP_URL;
+                    }, 1500);
+                } else {
+                    responseLog.textContent = "ACCESS DENIED. Incorrect password.";
+                    responseLog.className = 'error';
+                    outputDiv.appendChild(responseLog);
+                }
+                
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        });
+    </script>
+</body>
+</html>
