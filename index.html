@@ -88,12 +88,12 @@
         <input type="password" id="password-input" autocomplete="off" autofocus>
     </div>
 
-    <script>
+   <script>
         // ---------------------------------------------------------
         // 1. 設定你們的專屬通關密碼 
         const CORRECT_PASSWORD = "1012"; 
         
-        // 2. 這裡必須跳轉到選擇題關卡，而不是直接去 Canva
+        // 2. 這裡必須跳轉到選擇題關卡
         const NEXT_STEP_URL = "challenge.html"; 
         // ---------------------------------------------------------
 
@@ -137,13 +137,12 @@
                 const attempt = passwordInput.value;
                 passwordInput.value = '';
                 
-                const attemptLog = document.createElement('div');
-                attemptLog.textContent = `root@heart-sys:~# ********`;
-                outputDiv.appendChild(attemptLog);
-
                 const responseLog = document.createElement('div');
 
                 if (attempt === CORRECT_PASSWORD) {
+                    // 【修改重點 1】答對密碼後，直接把輸入框和 root@heart-sys:~# 徹底隱藏起來！
+                    inputContainer.style.display = 'none';
+                    
                     responseLog.textContent = "ACCESS GRANTED. Redirecting to secure channel...";
                     responseLog.className = 'success';
                     outputDiv.appendChild(responseLog);
@@ -152,6 +151,7 @@
                         window.location.href = NEXT_STEP_URL;
                     }, 1500);
                 } else {
+                    // 【修改重點 2】答錯時，不再多印出那行無用的 ********，直接給出紅色警告
                     responseLog.textContent = "ACCESS DENIED. Incorrect password.";
                     responseLog.className = 'error';
                     outputDiv.appendChild(responseLog);
