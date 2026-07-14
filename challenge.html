@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Retrieval System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        
+        body {
+            background-color: #050505;
+            color: #00ffcc;
+            font-family: 'Share Tech Mono', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            background: rgba(0, 20, 20, 0.9);
+            border: 1px solid #00ffcc;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.15);
+            padding: 30px;
+            width: 85%;
+            max-width: 650px;
+            position: relative;
+        }
+
+        /* 掃描線特效 */
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: rgba(0, 255, 204, 0.6);
+            animation: scanline 2.5s linear infinite;
+            pointer-events: none;
+        }
+
+        h2 { 
+            text-transform: uppercase; 
+            border-bottom: 1px dashed #00ffcc; 
+            padding-bottom: 10px; 
+            margin-top: 0;
+        }
+        
+        #progress-text { margin-bottom: 20px; font-weight: bold; }
+
+        .question-block { display: none; }
+        .question-block.active { display: block; animation: fadeIn 0.4s; }
+
+        .question-text { 
+            font-size: 1.2rem; 
+            margin-bottom: 20px; 
+            line-height: 1.6; 
+            color: #fff; 
+        }
+        
+        .opt-btn {
+            display: block;
+            width: 100%;
+            background: rgba(0, 255, 204, 0.05);
+            border: 1px solid #00ffcc;
+            color: #00ffcc;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.1rem;
+            text-align: left;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .opt-btn:hover { 
+            background: #00ffcc; 
+            color: #000; 
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        }
+
+        .feedback { margin-top: 15px; font-size: 1rem; min-height: 1.5em;}
+        .error { color: #ff3366; text-shadow: 0 0 5px rgba(255, 51, 102, 0.5); }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scanline { 0% { top: 0; } 100% { top: 100%; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Identity Verification Protocol</h2>
+        <div id="progress-text">STAGE 1 / 5</div>
+
+        <div class="question-block active" id="q1">
+            <div class="question-text">
+                [DATA_QUERY_01]<br>
+                第一次在學校的哪裡牽手？
+            </div>
+            <button class="opt-btn" onclick="checkAns(1, 1)">[A] mini sport hall</button>
+            <button class="opt-btn" onclick="checkAns(1, 2)">[B] exam hall</button>
+            <button class="opt-btn" onclick="checkAns(1, 3)">[C] fist building</button>
+            <div class="feedback error" id="feed1"></div>
+        </div>
+
+        <div class="question-block" id="q2">
+            <div class="question-text">
+                [DATA_QUERY_02]<br>
+                一起去過幾次 bukit beruang pasar pagi？
+            </div>
+            <button class="opt-btn" onclick="checkAns(2, 1)">[A] 1 次</button>
+            <button class="opt-btn" onclick="checkAns(2, 2)">[B] 20 次</button>
+            <button class="opt-btn" onclick="checkAns(2, 3)">[C] 100 次</button>
+            <div class="feedback error" id="feed2"></div>
+        </div>
+
+        <div class="question-block" id="q3">
+            <div class="question-text">
+                [DATA_QUERY_03]<br>
+                第一次一起吃 McD 是吃什麼？
+            </div>
+            <button class="opt-btn" onclick="checkAns(3, 1)">[A] wrap</button>
+            <button class="opt-btn" onclick="checkAns(3, 2)">[B] ayam tender</button>
+            <button class="opt-btn" onclick="checkAns(3, 3)">[C] fish burger</button>
+            <div class="feedback error" id="feed3"></div>
+        </div>
+
+        <div class="question-block" id="q4">
+            <div class="question-text">
+                [DATA_QUERY_04]<br>
+                一起參加過幾次龍舟比賽？
+            </div>
+            <button class="opt-btn" onclick="checkAns(4, 1)">[A] 0 次</button>
+            <button class="opt-btn" onclick="checkAns(4, 2)">[B] 1 次</button>
+            <button class="opt-btn" onclick="checkAns(4, 3)">[C] 3 次</button>
+            <div class="feedback error" id="feed4"></div>
+        </div>
+
+        <div class="question-block" id="q5">
+            <div class="question-text">
+                [DATA_QUERY_05]<br>
+                看太陽女子合唱團有一起哭嗎？
+            </div>
+            <button class="opt-btn" onclick="checkAns(5, 1)">[A] 有</button>
+            <button class="opt-btn" onclick="checkAns(5, 2)">[B] 沒有</button>
+            <div class="feedback error" id="feed5"></div>
+        </div>
+
+        <div class="question-block" id="success-block">
+            <div class="question-text" style="color:#00ffcc; text-align:center; font-size: 1.5rem; border: 1px solid #00ffcc; padding: 20px;">
+                [ ALL MEMORY HASHES VERIFIED ]<br><br>
+                身份確認完畢。<br>
+                歡迎回來，準備載入 1000 天資料庫...
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ==========================================
+        // ⚠️ 在這裡設定正確答案的選項 (1, 2, 或 3) ⚠️
+        // ==========================================
+        // 目前我全部預設為 1，請務必改成你們真正的答案！
+        const correctAnswers = {
+            1: 2,  // 第一題的正確答案是第幾個選項？
+            2: 1,  // 第二題的正確答案是第幾個選項？
+            3: 1,  // 第三題的正確答案是第幾個選項？
+            4: 2,  // 第四題的正確答案是第幾個選項？
+            5: 1   // 第五題的正確答案是第幾個選項？
+        };
+        
+        // 你的最終 Canva 紀念網頁連結
+        const FINAL_URL = "https://canva.link/mr3xtbv0fy1x2xa"; 
+        // ==========================================
+
+        function checkAns(questionNumber, selectedOption) {
+            const feedbackDiv = document.getElementById('feed' + questionNumber);
+            
+            // 檢查答案是否正確
+            if (selectedOption === correctAnswers[questionNumber]) {
+                // 答對了
+                feedbackDiv.innerText = "";
+                
+                // 隱藏當前題目
+                document.getElementById('q' + questionNumber).classList.remove('active');
+                
+                // 判斷是否為最後一題
+                if (questionNumber < 5) {
+                    const nextQ = questionNumber + 1;
+                    document.getElementById('q' + nextQ).classList.add('active');
+                    document.getElementById('progress-text').innerText = "STAGE " + nextQ + " / 5";
+                } else {
+                    // 全對，顯示成功畫面並跳轉
+                    document.getElementById('progress-text').innerText = "SYSTEM UNLOCKED";
+                    document.getElementById('success-block').classList.add('active');
+                    
+                    setTimeout(() => { 
+                        window.location.href = FINAL_URL; 
+                    }, 2500);
+                }
+            } else {
+                // 答錯了，給予駭客風格的錯誤提示
+                const errorMessages = [
+                    "ERROR: Memory mismatch.",
+                    "WARNING: Invalid memory hash.",
+                    "ACCESS DENIED: Are you really her?",
+                    "ALERT: Incorrect data correlation."
+                ];
+                const randomMsg = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+                feedbackDiv.innerText = randomMsg;
+            }
+        }
+    </script>
+</body>
+</html>
